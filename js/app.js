@@ -174,8 +174,6 @@ function renderCards() {
   }
 }
 
-// ---------- Card Template con visualizador de diapositivas ----------
-
 function cardTemplate(item) {
   const actions = state.isAdmin
     ? `<div class="card-actions">
@@ -183,36 +181,13 @@ function cardTemplate(item) {
          <button class="icon-btn" data-delete="${item.id}" title="Eliminar">🗑️</button>
        </div>`
     : "";
-
-  // VISUALIZADOR EMPOTRADO: Si hay url_diapositiva, incrustamos el visor interactivo de Google Docs
-  const diapositivaViewer = item.url_diapositiva
-    ? `<div class="card-slide-viewer">
-         <div class="viewer-header">
-           <span>📊 Previsualización de Diapositivas</span>
-           <a href="${item.url_diapositiva}" target="_blank" rel="noopener noreferrer" class="btn-fullscreen-slide">
-             🔲 Abrir completa
-           </a>
-         </div>
-         <iframe 
-           src="https://docs.google.com/gview?url=${encodeURIComponent(item.url_diapositiva)}&embedded=true" 
-           style="width:100%; height:380px; border:none;" 
-           allowfullscreen>
-         </iframe>
-       </div>`
-    : "";
-
   return `
     <article class="card">
       <div class="card-head">
-        <div class="card-main-content" style="width: 100%;">
-          <h3 class="card-title">${escapeHtml(item.titulo)}</h3>
-          <p class="card-desc">${escapeHtml(item.descripcion || "")}</p>
-          
-          ${diapositivaViewer}
-          
-        </div>
+        <h3 class="card-title">${escapeHtml(item.titulo)}</h3>
         ${actions}
       </div>
+      <p class="card-desc">${escapeHtml(item.descripcion || "")}</p>
     </article>
   `;
 }
@@ -254,24 +229,6 @@ function openLightbox(src, alt) {
   $("#lightbox-img").src = src;
   $("#lightbox-img").alt = alt || "";
   $("#lightbox-backdrop").classList.remove("hidden");
-}
-
-// ---------- Funciones de administración (placeholder) ----------
-
-async function checkSession() {
-  // Implementar lógica de sesión
-  state.isAdmin = false; // Cambiar según autenticación
-}
-
-function openResourceModal(item) {
-  // Implementar modal de edición
-  console.log("Editar item:", item);
-}
-
-async function deleteContenido(id) {
-  if (!confirm("¿Estás seguro de eliminar este contenido?")) return;
-  // Implementar eliminación
-  console.log("Eliminar item:", id);
 }
 
 document.addEventListener("DOMContentLoaded", init);
