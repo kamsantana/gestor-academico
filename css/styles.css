@@ -39,26 +39,48 @@
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 
+/* ==========================================================
+   ESTILOS BASE DE BODY Y TRANSICIÓN DINÁMICA DE FONDOS
+   ========================================================== */
 body {
   margin: 0;
   font-family: var(--font-body);
   color: var(--paper);
   min-height: 100vh;
-  /* 1. ELIMINADAS CUADRICULAS - Fondo azul claro degradado y fluido */
-  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #122238 100%);
   position: relative;
   overflow-x: hidden;
+  
+  /* Fondo por defecto: Arquitectura de Software (Azul profundo) */
+  background: linear-gradient(135deg, #122238 0%, #1e3c72 50%, #0f1b29 100%);
+  
+  /* Animación suave de 0.8 segundos al cambiar de color */
+  transition: background 0.8s ease-in-out; 
 }
 
+/* ESTADO: Cuando la materia activa sea Calidad de Software */
+body[data-materia="calidad-de-software"] {
+  /* Fondo personalizado: Tonos oscuros rojizos/óxido/ámbar elegantes */
+  background: linear-gradient(135deg, #1c1512 0%, #3a221a 50%, #120b08 100%);
+}
+
+/* Modificación de los reflejos radiales de fondo para que combinen */
 body::before {
   content: '';
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
   background: 
-    radial-gradient(ellipse at 20% 20%, rgba(79, 209, 232, 0.15), transparent 60%),
-    radial-gradient(ellipse at 80% 80%, rgba(232, 115, 74, 0.08), transparent 60%);
+    radial-gradient(ellipse at 20% 20%, rgba(79, 209, 232, 0.12), transparent 60%),
+    radial-gradient(ellipse at 80% 80%, rgba(232, 115, 74, 0.06), transparent 60%);
   pointer-events: none;
   z-index: 0;
+  transition: background 0.8s ease-in-out;
+}
+
+/* Cambiar los reflejos radiales también cuando sea Calidad de Software */
+body[data-materia="calidad-de-software"]::before {
+  background: 
+    radial-gradient(ellipse at 20% 20%, rgba(232, 115, 74, 0.15), transparent 60%),
+    radial-gradient(ellipse at 80% 80%, rgba(79, 232, 170, 0.05), transparent 60%);
 }
 
 /* ==========================================================
@@ -87,10 +109,9 @@ body::before {
   margin: 0; padding: 0; 
   display: flex;
   flex-direction: column;
-  gap: 10px; /* Separación limpia */
+  gap: 10px;
 }
 
-/* Botones de semana estilo píldora/cápsula interactiva */
 .week-item {
   display: flex;
   align-items: center;
@@ -121,7 +142,6 @@ body::before {
   transition: var(--transition);
 }
 
-/* Hover dinámico */
 .week-item:hover { 
   background: rgba(79, 209, 232, 0.08); 
   border-color: rgba(79, 209, 232, 0.3);
@@ -129,7 +149,6 @@ body::before {
   transform: translateX(6px);
 }
 
-/* Semana Activa: Cambia de color con un degradado premium */
 .week-item.active {
   background: linear-gradient(135deg, rgba(79, 209, 232, 0.25) 0%, rgba(18, 34, 56, 0.6) 100%);
   border-color: rgba(79, 209, 232, 0.4);
@@ -137,6 +156,7 @@ body::before {
   font-weight: 600;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
+
 .week-item.active .num {
   background: linear-gradient(135deg, var(--cyan-accent), #6ee3f5);
   color: #122238;
@@ -167,12 +187,10 @@ body::before {
   display: flex; align-items: center; gap: 8px;
 }
 
-/* Inyección de Emojis elegantes en los Botones del Menú mediante CSS */
 .tab-btn[data-seccion="concepto"]::before { content: "💡"; }
 .tab-btn[data-seccion="tarea"]::before { content: "📝"; }
 .tab-btn[data-seccion="consulta"]::before { content: "💬"; }
 
-/* Cambios de color dinámicos al activar las pestañas */
 .tab-btn.active { color: #122238; font-weight: 700; }
 
 .tab-btn[data-seccion="concepto"].active {
@@ -188,7 +206,6 @@ body::before {
   box-shadow: 0 4px 15px rgba(79, 232, 170, 0.4);
 }
 
-/* Estilización Avanzada de las Tarjetas de Contenido */
 .cards { display: flex; flex-direction: column; gap: 20px; }
 
 .card {
@@ -203,7 +220,6 @@ body::before {
   box-shadow: var(--shadow-card);
 }
 
-/* Generador de indicador elegante superior con emoji automático dentro de la tarjeta */
 .card::before {
   position: absolute;
   top: 14px; left: 32px;
@@ -216,7 +232,6 @@ body::before {
   letter-spacing: 0.5px;
 }
 
-/* Diferenciación radical y elegante por tipo de sección activa */
 .card[data-seccion="concepto"], [data-seccion="concepto"] .card {
   border-left: 4px solid var(--concepto-color);
 }
@@ -247,7 +262,6 @@ body::before {
 }
 .card[data-seccion="consulta"] .card-title, [data-seccion="consulta"] .card .card-title { color: var(--consulta-color); }
 
-/* Separación del título para no encimarse con el Badge superior inyectado */
 .card-head {
   margin-top: 15px;
   display: flex;

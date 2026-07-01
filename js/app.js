@@ -66,6 +66,12 @@ async function loadMaterias() {
 
   state.materias = data || [];
   state.materiaActual = state.materias[0] || null;
+  
+  // Sincronizar el fondo inicial de la pantalla
+  if (state.materiaActual) {
+    document.body.setAttribute("data-materia", state.materiaActual.slug);
+  }
+  
   renderMateriaSwitch();
 }
 
@@ -79,6 +85,10 @@ function renderMateriaSwitch() {
     btn.textContent = m.nombre;
     btn.addEventListener("click", () => {
       state.materiaActual = m;
+      
+      // NUEVO: Cambiar dinámicamente el fondo de pantalla según la materia seleccionada
+      document.body.setAttribute("data-materia", m.slug);
+      
       renderMateriaSwitch();
       loadContenidosSemana();
     });
@@ -175,7 +185,7 @@ function renderCards() {
 }
 
 // ==========================================================
-// CARDTEMPLATE CON VISUALIZADOR DE DIAPOSITIVAS
+// CARDTEMPLATE CON VISUALIZADOR DE IMÁGENES Y DIAPOSITIVAS
 // ==========================================================
 
 function cardTemplate(item) {
@@ -184,6 +194,21 @@ function cardTemplate(item) {
          <button class="icon-btn" data-edit="${item.id}" title="Editar">✏️</button>
          <button class="icon-btn" data-delete="${item.id}" title="Eliminar">🗑️</button>
        </div>`
+    : "";
+
+  // NUEVO: Renderizador de imagen adjunta dentro de la tarjeta
+  const imageRender = item.url_imagen
+    ? `
+      <div class="card-image-container" style="margin-top: 16px; border-radius: var(--radius-md); overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.08); background: rgba(0, 0, 0, 0.2);">
+        <img 
+          src="${item.url_imagen}" 
+          alt="${escapeHtml(item.titulo)}" 
+          class="card-attached-img" 
+          style="width: 100%; height: auto; display: block; cursor: pointer;"
+          onclick="openLightbox('${item.url_imagen}', '${escapeHtml(item.titulo)}')"
+        />
+      </div>
+    `
     : "";
 
   // VISUALIZADOR DE DIAPOSITIVAS
@@ -213,11 +238,12 @@ function cardTemplate(item) {
     : "";
 
   return `
-    <article class="card">
+    <article class="card" data-seccion="${item.seccion}">
       <div class="card-head">
-        <div class="card-main-content">
+        <div class="card-main-content" style="width: 100%;">
           <h3 class="card-title">${escapeHtml(item.titulo)}</h3>
-          <p class="card-desc">${escapeHtml(item.descripcion || "")}</p>
+          <p class="card-desc" style="white-space: pre-wrap;">${escapeHtml(item.descripcion || "")}</p>
+          ${imageRender}
           ${diapositivaViewer}
         </div>
         ${actions}
