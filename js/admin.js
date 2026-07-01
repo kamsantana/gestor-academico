@@ -48,6 +48,34 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   $("#resource-form").addEventListener("submit", handleResourceSubmit);
+
+  // NUEVO: Escuchar el evento de pegar (Ctrl+V) una imagen o captura dentro del modal
+  $("#resource-form").addEventListener("paste", (e) => {
+    const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+    
+    for (let index in items) {
+      const item = items[index];
+      // Detectamos si lo que viene en el portapapeles es una imagen
+      if (item.kind === "file" && item.type.startsWith("image/")) {
+        const blob = item.getAsFile();
+        
+        // Empaquetamos el blob temporal como un archivo File real de JS
+        const file = new File([blob], `captura-${Date.now()}.png`, { type: "image/png" });
+        
+        // Lo inyectamos de forma dinámica al input nativo de tu HTML (#f-imagen)
+        const fileInput = $("#f-imagen");
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        fileInput.files = dataTransfer.files;
+        
+        // Modificamos el marcador de posición de la descripción para dar feedback visual
+        const descEl = $("#f-descripcion");
+        descEl.placeholder = "¡Imagen de ejercicio detectada y cargada con éxito! 🎉";
+        
+        break;
+      }
+    }
+  });
 });
 
 // ---------- Sesión ----------
@@ -101,6 +129,7 @@ function openResourceModal(item) {
   fillSemanaOptions();
   $("#resource-error").classList.add("hidden");
   $("#resource-form").reset();
+  $("#f-descripcion").placeholder = ""; // Limpiar placeholder de feedback
 
   if (item) {
     $("#resource-modal-title").textContent = "Editar recurso";
