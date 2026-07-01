@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Gestor Académico · Arquitectura &amp; Calidad de Software</title>
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+<div class="reg-mark tl"></div>
+<div class="reg-mark tr"></div>
+<div class="reg-mark bl"></div>
+<div class="reg-mark br"></div>
+
+<div id="config-warning"></div>
+
+<header class="titleblock">
+  <div class="titleblock-inner">
+    <div class="brand">
+      <span class="brand-mark">GA</span>
+      <span class="brand-name">Gestor Académico · Ciclo de 9 semanas</span>
+    </div>
+
+    <nav class="materia-switch" id="materia-switch"></nav>
+
+    <div class="session-area" id="session-area">
+      <button class="btn-ghost" id="btn-login">Iniciar sesión</button>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <p class="sidebar-title">Semanas</p>
+    <ul class="week-list" id="week-list"></ul>
+  </aside>
+
+  <main class="content">
+    <div class="sheet-header">
+      <h1 class="sheet-title" id="sheet-title">Semana <span class="dim">— cargando…</span></h1>
+      <span class="sheet-meta" id="sheet-meta"></span>
+    </div>
+
+    <div class="tabs" id="tabs">
+      <button class="tab-btn active" data-seccion="concepto">Conceptos</button>
+      <button class="tab-btn" data-seccion="tarea">Tareas</button>
+      <button class="tab-btn" data-seccion="consulta">Consultas</button>
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
+      <button class="btn-primary hidden" id="btn-add">+ Añadir nuevo recurso</button>
+    </div>
+
+    <div class="cards" id="cards"></div>
+
+    <section class="resources">
+      <p class="resources-title">Recursos de la semana</p>
+      <div class="resource-grid" id="resource-grid"></div>
+    </section>
+  </main>
+</div>
+
+<footer class="site-footer">Supabase · GitHub Pages / Vercel — panel v1.0</footer>
+
+<!-- ===================== MODAL: LOGIN ===================== -->
+<div class="modal-backdrop hidden" id="login-backdrop">
+  <div class="modal">
+    <h2>Acceso administrador</h2>
+    <form id="login-form">
+      <div class="field">
+        <label for="login-email">Correo</label>
+        <input type="email" id="login-email" required autocomplete="username" />
+      </div>
+      <div class="field">
+        <label for="login-password">Contraseña</label>
+        <input type="password" id="login-password" required autocomplete="current-password" />
+      </div>
+      <p class="form-error hidden" id="login-error"></p>
+      <div class="form-actions">
+        <button type="button" class="btn-ghost" id="login-cancel">Cancelar</button>
+        <button type="submit" class="btn-primary">Ingresar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== MODAL: NUEVO / EDITAR RECURSO ===================== -->
+<div class="modal-backdrop hidden" id="resource-backdrop">
+  <div class="modal">
+    <h2 id="resource-modal-title">Añadir nuevo recurso</h2>
+    <form id="resource-form">
+      <input type="hidden" id="resource-id" />
+      <div class="field-row">
+        <div class="field">
+          <label for="f-semana">Semana</label>
+          <select id="f-semana"></select>
+        </div>
+        <div class="field">
+          <label for="f-seccion">Sección</label>
+          <select id="f-seccion">
+            <option value="concepto">Concepto</option>
+            <option value="tarea">Tarea</option>
+            <option value="consulta">Consulta</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="f-titulo">Título</label>
+        <input type="text" id="f-titulo" required />
+      </div>
+      <div class="field">
+        <label for="f-descripcion">Descripción</label>
+        <textarea id="f-descripcion"></textarea>
+      </div>
+      <div class="field">
+        <label for="f-imagen">Imagen (opcional)</label>
+        <input type="file" id="f-imagen" accept="image/*" />
+      </div>
+      <div class="field">
+        <label for="f-diapositiva">Diapositiva / archivo (opcional)</label>
+        <input type="file" id="f-diapositiva" accept=".pdf,.ppt,.pptx,.doc,.docx" />
+      </div>
+      <p class="form-error hidden" id="resource-error"></p>
+      <div class="form-actions">
+        <button type="button" class="btn-ghost" id="resource-cancel">Cancelar</button>
+        <button type="submit" class="btn-primary" id="resource-submit">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== LIGHTBOX (imagen a pantalla completa) ===================== -->
+<div class="lightbox-backdrop hidden" id="lightbox-backdrop">
+  <img id="lightbox-img" src="" alt="" />
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/supabaseClient.js"></script>
+<script src="js/app.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>
