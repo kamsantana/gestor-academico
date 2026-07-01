@@ -1,15 +1,116 @@
-/* ---------- Contenedor del Visor de Diapositivas ---------- */
+/* ==========================================================
+   TARJETAS - Estilos completos
+   ========================================================== */
+
+/* Contenedor de tarjetas */
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Cada tarjeta individual */
+.card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+  width: 100%;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  border-color: #444c56;
+}
+
+/* Cabecera de la tarjeta (flex para alinear título y acciones) */
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+}
+
+/* Contenido principal (ocupa todo el ancho disponible) */
+.card-main-content {
+  flex: 1;
+  min-width: 0; /* Evita overflow */
+  width: 100%;
+}
+
+/* Título */
+.card-title {
+  margin: 0 0 8px 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--paper);
+  word-wrap: break-word;
+}
+
+/* Descripción */
+.card-desc {
+  margin: 0 0 12px 0;
+  color: #adbac7;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Acciones (editar/eliminar) */
+.card-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.card-actions .icon-btn {
+  background: var(--bg-dark);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+  color: var(--paper-dim);
+}
+
+.card-actions .icon-btn:hover {
+  border-color: var(--paper-dim);
+  color: var(--paper);
+}
+
+/* Responsive para móviles */
+@media (max-width: 640px) {
+  .card-head {
+    flex-direction: column;
+  }
+  
+  .card-actions {
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: 8px;
+  }
+}
+
+/* ==========================================================
+   CONTENEDOR DEL VISOR DE DIAPOSITIVAS (tu código existente)
+   ========================================================== */
 .card-slide-viewer {
   margin-top: 18px;
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius); /* Usamos la variable global para consistencia */
+  border-radius: var(--radius);
   overflow: hidden;
   background: var(--bg-dark);
 }
 
 .viewer-header {
   background: rgba(255, 255, 255, 0.03);
-  padding: 10px 16px; /* Un poco más de padding para mejor espaciado */
+  padding: 10px 16px;
   border-bottom: 1px solid var(--border-subtle);
   display: flex;
   justify-content: space-between;
@@ -17,8 +118,8 @@
   font-family: var(--font-body);
   font-size: 0.8rem;
   color: var(--paper-dim);
-  flex-wrap: wrap; /* Para responsive */
-  gap: 8px; /* Espacio entre elementos en móvil */
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .btn-fullscreen-slide {
@@ -43,7 +144,7 @@
 
 .card-slide-viewer iframe {
   display: block;
-  background: #ffffff; /* Fondo blanco para el documento */
+  background: #ffffff;
   width: 100%;
   height: 380px;
   border: none;
@@ -52,7 +153,7 @@
 /* Responsive para móviles */
 @media (max-width: 640px) {
   .card-slide-viewer iframe {
-    height: 220px; /* Altura más pequeña en móviles */
+    height: 220px;
   }
   
   .viewer-header {
