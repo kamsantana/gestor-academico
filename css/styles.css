@@ -376,3 +376,50 @@ body[data-materia="calidad-de-software"]::before {
   .week-item:hover { transform: translateY(-2px); }
   .content { padding: 24px; }
 }
+/* ==========================================================
+   AJUSTE DE INTEGRACIÓN CON TU HTML REAL (Final del archivo)
+   ========================================================== */
+.layout {
+  display: flex;
+  width: 100%;
+  min-height: calc(100vh - 72px);
+  gap: 32px; 
+  padding: 24px; 
+  box-sizing: border-box;
+  max-width: 1440px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.sidebar {
+  width: 260px;
+  flex-shrink: 0; /* Evita que la barra de semanas se deforme */
+}
+
+.content {
+  flex-grow: 1; /* El bloque derecho (main) ocupa el resto de la pantalla */
+  min-width: 0; /* Evita bugs de desbordamiento en flexbox */
+}
+
+/* Soporte para esquinas técnicas (reg-mark) */
+.reg-mark {
+  position: fixed;
+  width: 15px;
+  height: 15px;
+  border: 1px solid var(--blue-line);
+  pointer-events: none;
+  z-index: 50;
+}
+.reg-mark.tl { top: 10px; left: 10px; border-right: none; border-bottom: none; }
+.reg-mark.tr { top: 10px; right: 10px; border-left: none; border-bottom: none; }
+.reg-mark.bl { bottom: 10px; left: 10px; border-right: none; border-top: none; }
+.reg-mark.br { bottom: 10px; right: 10px; border-left: none; border-top: none; }
+
+/* Ajuste responsive para dispositivos móviles */
+@media (max-width: 900px) {
+  .layout { flex-direction: column; gap: 20px; padding: 16px; }
+  .sidebar { width: 100%; padding: 0; border-right: none; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+  .week-list { flex-direction: row; overflow-x: auto; padding-bottom: 8px; gap: 8px; }
+  .week-item { white-space: nowrap; }
+}
