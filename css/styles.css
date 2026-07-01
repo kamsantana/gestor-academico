@@ -293,8 +293,15 @@ a { color: inherit; }
   font-weight: 600;
 }
 
-/* ---------- Tarjetas tipo "hoja de especificación" ---------- */
-.cards { display: grid; gap: 14px; }
+/* ==========================================================
+   TARJETAS - Estilo "hoja de especificación" mejorado
+   ========================================================== */
+
+.cards { 
+  display: flex;
+  flex-direction: column;
+  gap: 14px; 
+}
 
 .card {
   position: relative;
@@ -302,38 +309,75 @@ a { color: inherit; }
   border: 1px solid var(--blue-line);
   border-radius: var(--radius);
   padding: 16px 18px;
+  transition: transform 0.15s ease, border-color 0.15s ease;
 }
 
+.card:hover {
+  border-color: var(--cyan-accent);
+  transform: translateY(-1px);
+}
+
+/* Marca de esquina tipo plano */
 .card::before {
-  /* marca de esquina tipo plano */
   content: '';
   position: absolute;
-  top: 8px; left: 8px;
-  width: 8px; height: 8px;
+  top: 8px; 
+  left: 8px;
+  width: 8px; 
+  height: 8px;
   border-top: 1px solid var(--cyan-accent);
   border-left: 1px solid var(--cyan-accent);
   opacity: 0.6;
 }
 
+/* Cabecera de la tarjeta */
 .card-head {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 10px;
+  width: 100%;
 }
 
-.card-title { margin: 0 0 6px; font-size: 1.02rem; font-weight: 600; }
+/* Contenido principal */
+.card-main-content {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+}
 
+/* Título */
+.card-title { 
+  margin: 0 0 6px; 
+  font-size: 1.02rem; 
+  font-weight: 600; 
+  color: var(--paper);
+  word-wrap: break-word;
+}
+
+/* Descripción */
 .card-desc {
-  margin: 0;
+  margin: 0 0 12px 0;
   color: var(--paper-dim);
   font-size: 0.92rem;
   line-height: 1.55;
   white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
-.card-actions { display: flex; gap: 6px; opacity: 0; transition: opacity .15s; }
-.card:hover .card-actions { opacity: 1; }
+/* Acciones (editar/eliminar) */
+.card-actions { 
+  display: flex; 
+  gap: 6px; 
+  flex-shrink: 0;
+  margin-top: 4px;
+  opacity: 0; 
+  transition: opacity .15s; 
+}
+
+.card:hover .card-actions { 
+  opacity: 1; 
+}
 
 .icon-btn {
   background: transparent;
@@ -343,8 +387,13 @@ a { color: inherit; }
   padding: 4px 7px;
   cursor: pointer;
   font-size: 0.85rem;
+  transition: all 0.15s ease;
 }
-.icon-btn:hover { color: var(--paper); border-color: var(--cyan-accent); }
+
+.icon-btn:hover { 
+  color: var(--paper); 
+  border-color: var(--cyan-accent); 
+}
 
 .empty-state {
   border: 1px dashed var(--blue-line);
@@ -355,7 +404,65 @@ a { color: inherit; }
   font-size: 0.9rem;
 }
 
-/* ---------- Bloque de recursos de la semana ---------- */
+/* ==========================================================
+   VISUALIZADOR DE DIAPOSITIVAS
+   ========================================================== */
+
+.card-slide-viewer {
+  margin-top: 16px;
+  border: 1px solid var(--blue-line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--blue-deep);
+  width: 100%;
+}
+
+.viewer-header {
+  background: rgba(255, 255, 255, 0.03);
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--blue-line);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  color: var(--paper-dim);
+}
+
+.btn-fullscreen-slide {
+  color: var(--cyan-accent);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.75rem;
+  background: rgba(79, 209, 232, 0.08);
+  padding: 4px 12px;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-fullscreen-slide:hover {
+  color: var(--paper);
+  background: rgba(79, 209, 232, 0.2);
+  border-color: var(--cyan-accent);
+  text-decoration: none;
+}
+
+.card-slide-viewer iframe {
+  display: block;
+  background: #ffffff;
+  width: 100%;
+  height: 380px;
+  border: none;
+}
+
+/* ==========================================================
+   BLOQUE DE RECURSOS DE LA SEMANA
+   ========================================================== */
+
 .resources {
   margin-top: 28px;
   border-top: 1px solid var(--blue-line);
@@ -384,9 +491,15 @@ a { color: inherit; }
   background: var(--blue-panel);
   cursor: pointer;
   text-align: left;
+  transition: border-color 0.15s ease;
 }
 
-.resource-card img { width: 100%; height: 100px; object-fit: cover; display: block; }
+.resource-card img { 
+  width: 100%; 
+  height: 100px; 
+  object-fit: cover; 
+  display: block; 
+}
 
 .resource-card .resource-label {
   padding: 8px 10px;
@@ -397,9 +510,14 @@ a { color: inherit; }
   gap: 6px;
 }
 
-.resource-card:hover { border-color: var(--cyan-accent); }
+.resource-card:hover { 
+  border-color: var(--cyan-accent); 
+}
 
-/* ---------- Formularios / modales ---------- */
+/* ==========================================================
+   FORMULARIOS / MODALES
+   ========================================================== */
+
 .modal-backdrop {
   position: fixed; inset: 0;
   background: rgba(6, 16, 27, 0.72);
@@ -453,6 +571,14 @@ a { color: inherit; }
   border-radius: var(--radius);
   font-family: var(--font-body);
   font-size: 0.9rem;
+  transition: border-color 0.15s ease;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+  border-color: var(--cyan-accent);
+  outline: none;
 }
 
 .field input[type="file"] {
@@ -461,9 +587,16 @@ a { color: inherit; }
   font-size: 0.82rem;
 }
 
-.field textarea { resize: vertical; min-height: 90px; }
+.field textarea { 
+  resize: vertical; 
+  min-height: 90px; 
+}
 
-.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.field-row { 
+  display: grid; 
+  grid-template-columns: 1fr 1fr; 
+  gap: 10px; 
+}
 
 .form-actions {
   display: flex;
@@ -483,6 +616,7 @@ a { color: inherit; }
   border-radius: var(--radius);
   cursor: pointer;
   font-weight: 700;
+  transition: filter 0.15s ease;
 }
 .btn-primary:hover { filter: brightness(1.08); }
 .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -500,6 +634,10 @@ a { color: inherit; }
   margin-top: 10px;
 }
 
+/* ==========================================================
+   LIGHTBOX
+   ========================================================== */
+
 .lightbox-backdrop {
   position: fixed; inset: 0;
   background: rgba(6, 16, 27, 0.88);
@@ -507,7 +645,15 @@ a { color: inherit; }
   z-index: 110;
   padding: 24px;
 }
-.lightbox-backdrop img { max-width: 100%; max-height: 90vh; border: 1px solid var(--blue-line); }
+.lightbox-backdrop img { 
+  max-width: 100%; 
+  max-height: 90vh; 
+  border: 1px solid var(--blue-line); 
+}
+
+/* ==========================================================
+   TOAST
+   ========================================================== */
 
 .toast {
   position: fixed;
@@ -523,7 +669,10 @@ a { color: inherit; }
   max-width: 320px;
 }
 
-/* ---------- Config warning banner ---------- */
+/* ==========================================================
+   CONFIG WARNING BANNER
+   ========================================================== */
+
 .config-warning {
   background: var(--amber-accent);
   color: var(--blue-deep);
@@ -532,9 +681,16 @@ a { color: inherit; }
   text-align: center;
   padding: 8px 16px;
 }
-.config-warning code { background: rgba(0,0,0,0.15); padding: 1px 5px; border-radius: 2px; }
+.config-warning code { 
+  background: rgba(0,0,0,0.15); 
+  padding: 1px 5px; 
+  border-radius: 2px; 
+}
 
-/* ---------- Utilidades ---------- */
+/* ==========================================================
+   UTILIDADES
+   ========================================================== */
+
 .hidden { display: none !important; }
 
 footer.site-footer {
@@ -547,6 +703,49 @@ footer.site-footer {
   text-transform: uppercase;
   letter-spacing: 0.04em;
   opacity: 0.6;
+}
+
+/* ==========================================================
+   RESPONSIVE
+   ========================================================== */
+
+@media (max-width: 640px) {
+  /* Visualizador de diapositivas */
+  .card-slide-viewer iframe {
+    height: 220px;
+  }
+  
+  .viewer-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  
+  .btn-fullscreen-slide {
+    align-self: flex-start;
+  }
+  
+  /* Tarjetas */
+  .card-head {
+    flex-direction: column;
+  }
+  
+  .card-actions {
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: 8px;
+    opacity: 1; /* Visible en móvil */
+  }
+  
+  /* Recursos */
+  .resource-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  }
+  
+  /* Modales */
+  .field-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
