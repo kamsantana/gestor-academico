@@ -233,7 +233,7 @@ function cardTemplate(item) {
        </div>`
     : "";
 
-  // NUEVO: Renderizador de imagen adjunta dentro de la tarjeta
+  // Renderizador de imagen adjunta dentro de la tarjeta
   const imageRender = item.url_imagen
     ? `
       <div class="card-image-container" style="margin-top: 16px; border-radius: var(--radius-md); overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.08); background: rgba(0, 0, 0, 0.2);">
@@ -248,21 +248,15 @@ function cardTemplate(item) {
     `
     : "";
 
-  // VISUALIZADOR INTELIGENTE DE DIAPOSITIVAS (Sin textos ni enlaces redundantes abajo)
+  // VISUALIZADOR SEGURO: Eliminamos gview por completo para evitar errores y descargas fantasma
   let diapositivaViewer = "";
 
   if (item.url_diapositiva) {
-    const urlString = item.url_diapositiva.toLowerCase();
-    let iframeSrc = "";
+    let iframeSrc = item.url_diapositiva;
 
-    // 1. Si es PDF, renderizado nativo directo libre de descargas fantasma en el historial
-    if (urlString.endsWith('.pdf')) {
-      iframeSrc = item.url_diapositiva;
-    } 
-    // 2. Si es PowerPoint, visor de Google acoplado a la caché diaria estática
-    else {
-      const fechaHoy = new Date().toISOString().split('T')[0];
-      iframeSrc = `https://docs.google.com/gview?url=${encodeURIComponent(item.url_diapositiva)}&v=${fechaHoy}&embedded=true`;
+    // Si estás usando Supabase Storage, forzamos la visualización en lugar de la descarga
+    if (iframeSrc.includes('storage.v1.object/public')) {
+      iframeSrc = iframeSrc.replace('?download=', '?view=');
     }
 
     diapositivaViewer = `
@@ -278,13 +272,13 @@ function cardTemplate(item) {
             🔍 Abrir completa
           </a>
         </div>
-        <iframe 
+        <embed 
           src="${iframeSrc}" 
-          loading="lazy"
-          title="Vista previa de ${escapeHtml(item.titulo)}"
-          allowfullscreen
-        >
-        </iframe>
+          type="application/pdf"
+          width="100%" 
+          height="500px"
+          style="border: none; border-radius: 0 0 6px 6px; background: rgba(0, 0, 0, 0.1);"
+        />
       </div>
     `;
   }
