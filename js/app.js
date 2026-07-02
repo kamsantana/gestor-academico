@@ -21,43 +21,6 @@ function escapeHtml(str) {
   }[c]));
 }
 
-// NUEVO: Procesador dinámico de tablas Markdown a HTML con diseño "plano técnico"
-function parseMarkdownTables(text) {
-  if (!text) return "";
-  
-  // Captura bloques de líneas que empiezan y terminan con la barra vertical '|'
-  const tableRegex = /((?:\|.+\|\r?\n?)+)/g;
-  
-  return text.replace(tableRegex, (match) => {
-    const lines = match.trim().split('\n');
-    if (lines.length < 2) return match; 
-
-    let html = '<div class="table-container" style="overflow-x: auto; margin: 16px 0; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 6px;"><table style="width:100%; border-collapse:collapse; font-size: 0.9rem; font-family: inherit; background: rgba(0, 0, 0, 0.15);">';
-    
-    lines.forEach((line, index) => {
-      // Divide y limpia espacios de cada celda de la fila
-      const cells = line.split('|').map(c => c.trim()).filter((c, i, a) => i > 0 && i < a.length - 1);
-      
-      // Salta las líneas divisorias de formato Markdown (ej: |--|--|--)
-      if (line.includes('---')) return;
-
-      if (index === 0) {
-        // Estilo del encabezado
-        html += '<thead style="background: rgba(255, 255, 255, 0.06); border-bottom: 2px solid rgba(255, 255, 255, 0.15);">';
-        html += '<tr>' + cells.map(c => `<th style="padding: 10px 12px; text-align: left; color: #fff; font-weight: 600;">${c}</th>`).join('') + '</tr>';
-        html += '</thead><tbody>';
-      } else {
-        // Estilo de las celdas de contenido
-        html += '<tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">';
-        html += cells.map(c => `<td style="padding: 10px 12px; color: #ccc; line-height: 1.4; vertical-align: top;">${c}</td>`).join('') + '</tr>';
-      }
-    });
-
-    html += '</tbody></table></div>';
-    return html;
-  });
-}
-
 function showToast(msg, isError = false) {
   const existing = document.querySelector(".toast");
   if (existing) existing.remove();
@@ -248,24 +211,9 @@ function cardTemplate(item) {
     `
     : "";
 
-  // VISUALIZADOR INTELIGENTE DE DIAPOSITIVAS (Sin textos ni enlaces redundantes abajo)
-  let diapositivaViewer = "";
-
-  if (item.url_diapositiva) {
-    const urlString = item.url_diapositiva.toLowerCase();
-    let iframeSrc = "";
-
-    // 1. Si es PDF, renderizado nativo directo libre de descargas fantasma en el historial
-    if (urlString.endsWith('.pdf')) {
-      iframeSrc = item.url_diapositiva;
-    } 
-    // 2. Si es PowerPoint, visor de Google acoplado a la caché diaria estática
-    else {
-      const fechaHoy = new Date().toISOString().split('T')[0];
-      iframeSrc = `https://docs.google.com/gview?url=${encodeURIComponent(item.url_diapositiva)}&v=${fechaHoy}&embedded=true`;
-    }
-
-    diapositivaViewer = `
+  // VISUALIZADOR DE DIAPOSITIVAS
+  const diapositivaViewer = item.url_diapositiva
+    ? `
       <div class="card-slide-viewer">
         <div class="viewer-header">
           <span>📊 Previsualización de Diapositivas</span>
@@ -279,22 +227,22 @@ function cardTemplate(item) {
           </a>
         </div>
         <iframe 
-          src="${iframeSrc}" 
+          src="https://docs.google.com/gview?url=${encodeURIComponent(item.url_diapositiva)}&embedded=true" 
           loading="lazy"
           title="Vista previa de ${escapeHtml(item.titulo)}"
           allowfullscreen
         >
         </iframe>
       </div>
-    `;
-  }
+    `
+    : "";
 
   return `
     <article class="card" data-seccion="${item.seccion}">
       <div class="card-head">
         <div class="card-main-content" style="width: 100%;">
           <h3 class="card-title">${escapeHtml(item.titulo)}</h3>
-          <div class="card-desc" style="white-space: pre-wrap; color: #ccc; line-height: 1.5;">${parseMarkdownTables(escapeHtml(item.descripcion || ""))}</div>
+          <p class="card-desc" style="white-space: pre-wrap;">${escapeHtml(item.descripcion || "")}</p>
           ${imageRender}
           ${diapositivaViewer}
         </div>
