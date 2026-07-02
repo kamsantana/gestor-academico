@@ -248,7 +248,7 @@ function cardTemplate(item) {
     `
     : "";
 
-  // VISUALIZADOR DE DIAPOSITIVAS
+  // VISUALIZADOR DE DIAPOSITIVAS MODIFICADO (Solución Anti-Caché para Netlify + Supabase)
   const diapositivaViewer = item.url_diapositiva
     ? `
       <div class="card-slide-viewer">
@@ -264,17 +264,22 @@ function cardTemplate(item) {
           </a>
         </div>
         <iframe 
-          src="https://docs.google.com/gview?url=${encodeURIComponent(item.url_diapositiva)}&embedded=true" 
+          src="https://docs.google.com/gview?url=${encodeURIComponent(item.url_diapositiva)}&v=${Date.now()}&embedded=true" 
           loading="lazy"
           title="Vista previa de ${escapeHtml(item.titulo)}"
           allowfullscreen
         >
         </iframe>
+        <div style="margin-top: 8px; text-align: center; font-size: 0.85rem;">
+          <span style="color: #aaa;">¿No carga la vista previa?</span> 
+          <a href="${item.url_diapositiva}" download target="_blank" rel="noopener noreferrer" style="color: #64ffda; text-decoration: underline; margin-left: 5px; font-weight: 500;">
+            Descárgala directamente aquí 📎
+          </a>
+        </div>
       </div>
     `
     : "";
 
-  // MODIFICADO: Se envuelve en un <div> y procesa las tablas después de escapar el HTML crudo
   return `
     <article class="card" data-seccion="${item.seccion}">
       <div class="card-head">
