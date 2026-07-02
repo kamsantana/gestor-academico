@@ -248,18 +248,18 @@ function cardTemplate(item) {
     `
     : "";
 
-  // MODIFICADO: VISUALIZADOR INTELIGENTE DE DIAPOSITIVAS (Evita descargas fantasmas en el historial)
+  // VISUALIZADOR INTELIGENTE DE DIAPOSITIVAS (Sin textos ni enlaces redundantes abajo)
   let diapositivaViewer = "";
 
   if (item.url_diapositiva) {
     const urlString = item.url_diapositiva.toLowerCase();
     let iframeSrc = "";
 
-    // 1. Si es PDF, renderizado nativo directo libre de intermediarios y libre de historial de descargas
+    // 1. Si es PDF, renderizado nativo directo libre de descargas fantasma en el historial
     if (urlString.endsWith('.pdf')) {
       iframeSrc = item.url_diapositiva;
     } 
-    // 2. Si es PowerPoint (.pptx, etc.), visor de Google con control de caché diario para mitigar peticiones duplicadas
+    // 2. Si es PowerPoint, visor de Google acoplado a la caché diaria estática
     else {
       const fechaHoy = new Date().toISOString().split('T')[0];
       iframeSrc = `https://docs.google.com/gview?url=${encodeURIComponent(item.url_diapositiva)}&v=${fechaHoy}&embedded=true`;
@@ -285,12 +285,6 @@ function cardTemplate(item) {
           allowfullscreen
         >
         </iframe>
-        <div style="margin-top: 8px; text-align: center; font-size: 0.85rem;">
-          <span style="color: #aaa;">¿No carga la vista previa?</span> 
-          <a href="${item.url_diapositiva}" download target="_blank" rel="noopener noreferrer" style="color: #64ffda; text-decoration: underline; margin-left: 5px; font-weight: 500;">
-            Descárgala directamente aquí 📎
-          </a>
-        </div>
       </div>
     `;
   }
