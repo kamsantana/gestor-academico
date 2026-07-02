@@ -248,9 +248,24 @@ function cardTemplate(item) {
     `
     : "";
 
-  // VISUALIZADOR DE DIAPOSITIVAS
-  const diapositivaViewer = item.url_diapositiva
-    ? `
+  // MODIFICADO: VISUALIZADOR INTELIGENTE DE DIAPOSITIVAS (Evita descargas fantasmas en el historial)
+  let diapositivaViewer = "";
+
+  if (item.url_diapositiva) {
+    const urlString = item.url_diapositiva.toLowerCase();
+    let iframeSrc = "";
+
+    // 1. Si es PDF, renderizado nativo directo libre de intermediarios y libre de historial de descargas
+    if (urlString.endsWith('.pdf')) {
+      iframeSrc = item.url_diapositiva;
+    } 
+    // 2. Si es PowerPoint (.pptx, etc.), visor de Google con control de caché diario para mitigar peticiones duplicadas
+    else {
+      const fechaHoy = new Date().toISOString().split('T')[0];
+      iframeSrc = `https://docs.google.com/gview?url=${encodeURIComponent(item.url_diapositiva)}&v=${fechaHoy}&embedded=true`;
+    }
+
+    diapositivaViewer = `
       <div class="card-slide-viewer">
         <div class="viewer-header">
           <span>📊 Previsualización de Diapositivas</span>
@@ -264,17 +279,22 @@ function cardTemplate(item) {
           </a>
         </div>
         <iframe 
-          src="https://docs.google.com/gview?url=${encodeURIComponent(item.url_diapositiva)}&embedded=true" 
+          src="${iframeSrc}" 
           loading="lazy"
           title="Vista previa de ${escapeHtml(item.titulo)}"
           allowfullscreen
         >
         </iframe>
+        <div style="margin-top: 8px; text-align: center; font-size: 0.85rem;">
+          <span style="color: #aaa;">¿No carga la vista previa?</span> 
+          <a href="${item.url_diapositiva}" download target="_blank" rel="noopener noreferrer" style="color: #64ffda; text-decoration: underline; margin-left: 5px; font-weight: 500;">
+            Descárgala directamente aquí 📎
+          </a>
+        </div>
       </div>
-    `
-    : "";
+    `;
+  }
 
-  // MODIFICADO: Se envuelve en un <div> y procesa las tablas después de escapar el HTML crudo
   return `
     <article class="card" data-seccion="${item.seccion}">
       <div class="card-head">
