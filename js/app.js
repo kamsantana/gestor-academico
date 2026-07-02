@@ -21,38 +21,26 @@ function escapeHtml(str) {
   }[c]));
 }
 
-// NUEVO: Procesador dinámico de tablas Markdown a HTML con diseño "plano técnico"
+// Procesador de tablas Markdown
 function parseMarkdownTables(text) {
   if (!text) return "";
-  
-  // Captura bloques de líneas que empiezan y terminan con la barra vertical '|'
   const tableRegex = /((?:\|.+\|\r?\n?)+)/g;
-  
   return text.replace(tableRegex, (match) => {
     const lines = match.trim().split('\n');
     if (lines.length < 2) return match; 
-
     let html = '<div class="table-container" style="overflow-x: auto; margin: 16px 0; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 6px;"><table style="width:100%; border-collapse:collapse; font-size: 0.9rem; font-family: inherit; background: rgba(0, 0, 0, 0.15);">';
-    
     lines.forEach((line, index) => {
-      // Divide y limpia espacios de cada celda de la fila
       const cells = line.split('|').map(c => c.trim()).filter((c, i, a) => i > 0 && i < a.length - 1);
-      
-      // Salta las líneas divisorias de formato Markdown (ej: |--|--|--)
       if (line.includes('---')) return;
-
       if (index === 0) {
-        // Estilo del encabezado
         html += '<thead style="background: rgba(255, 255, 255, 0.06); border-bottom: 2px solid rgba(255, 255, 255, 0.15);">';
         html += '<tr>' + cells.map(c => `<th style="padding: 10px 12px; text-align: left; color: #fff; font-weight: 600;">${c}</th>`).join('') + '</tr>';
         html += '</thead><tbody>';
       } else {
-        // Estilo de las celdas de contenido
         html += '<tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">';
         html += cells.map(c => `<td style="padding: 10px 12px; color: #ccc; line-height: 1.4; vertical-align: top;">${c}</td>`).join('') + '</tr>';
       }
     });
-
     html += '</tbody></table></div>';
     return html;
   });
@@ -87,7 +75,7 @@ async function init() {
 
 function renderDemoState() {
   $("#sheet-title").innerHTML = `Semana <span class="dim">1 — configura Supabase para ver datos reales</span>`;
-  $("#cards").innerHTML = `<div class="empty-state">Conecta tu proyecto de Supabase en <code>js/config.js</code> para cargar contenido real. Mientras tanto, esta es la interfaz de demostración.</div>`;
+  $("#cards").innerHTML = `<div class="empty-state">Conecta tu proyecto de Supabase en <code>js/config.js</code> para cargar contenido real.</div>`;
 }
 
 async function loadMaterias() {
@@ -103,12 +91,9 @@ async function loadMaterias() {
 
   state.materias = data || [];
   state.materiaActual = state.materias[0] || null;
-  
-  // Sincronizar el fondo inicial de la pantalla
   if (state.materiaActual) {
     document.body.setAttribute("data-materia", state.materiaActual.slug);
   }
-  
   renderMateriaSwitch();
 }
 
@@ -122,18 +107,13 @@ function renderMateriaSwitch() {
     btn.textContent = m.nombre;
     btn.addEventListener("click", () => {
       state.materiaActual = m;
-      
-      // NUEVO: Cambiar dinámicamente el fondo de pantalla según la materia seleccionada
       document.body.setAttribute("data-materia", m.slug);
-      
       renderMateriaSwitch();
       loadContenidosSemana();
     });
     nav.appendChild(btn);
   });
 }
-
-// ---------- Semanas ----------
 
 function buildWeekList() {
   const list = $("#week-list");
@@ -155,8 +135,6 @@ function buildWeekList() {
   }
 }
 
-// ---------- Tabs de sección ----------
-
 function bindStaticEvents() {
   $$(".tab-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -166,151 +144,97 @@ function bindStaticEvents() {
       renderCards();
     });
   });
-
   $("#lightbox-backdrop").addEventListener("click", () => {
     $("#lightbox-backdrop").classList.add("hidden");
   });
 }
 
-// ---------- Cargar contenidos de la semana ----------
-
 async function loadContenidosSemana() {
   if (!state.materiaActual) return;
-
   $("#sheet-title").innerHTML = `${escapeHtml(state.materiaActual.nombre)} <span class="dim">— Semana ${state.semanaActual}</span>`;
   $("#sheet-meta").textContent = `${state.semanaActual}/9`;
-
   const { data, error } = await supabaseClient
     .from("contenidos")
     .select("*")
     .eq("materia_id", state.materiaActual.id)
     .eq("semana", state.semanaActual)
     .order("created_at", { ascending: true });
-
-  if (error) {
-    showToast("Error cargando contenidos: " + error.message, true);
-    state.contenidosSemana = [];
-  } else {
-    state.contenidosSemana = data || [];
-  }
-
+  state.contenidosSemana = error ? [] : (data || []);
   renderCards();
   renderResources();
 }
 
-// ---------- Tarjetas (conceptos / tareas / consultas) ----------
-
 function renderCards() {
   const container = $("#cards");
   const items = state.contenidosSemana.filter((c) => c.seccion === state.seccionActual);
-
   if (items.length === 0) {
-    container.innerHTML = `<div class="empty-state">Todavía no hay contenido en esta sección para la semana ${state.semanaActual}.</div>`;
+    container.innerHTML = `<div class="empty-state">Todavía no hay contenido en esta sección.</div>`;
     return;
   }
-
   container.innerHTML = items.map((item) => cardTemplate(item)).join("");
-
-  if (state.isAdmin) {
-    container.querySelectorAll("[data-edit]").forEach((btn) => {
-      btn.addEventListener("click", () => openResourceModal(items.find((i) => i.id === btn.dataset.edit)));
-    });
-    container.querySelectorAll("[data-delete]").forEach((btn) => {
-      btn.addEventListener("click", () => deleteContenido(btn.dataset.delete));
-    });
-  }
 }
 
 // ==========================================================
-// CARDTEMPLATE CON VISUALIZADOR HÍBRIDO (PDF / PPTX) SEGURO
+// CARDTEMPLATE CORREGIDO: VISIBILIDAD Y HISTORIAL LIMPIO
 // ==========================================================
 
 function cardTemplate(item) {
   const actions = state.isAdmin
     ? `<div class="card-actions">
          <button class="icon-btn" data-edit="${item.id}" title="Editar">✏️</button>
-         <button class="icon-btn" data-delete="${item.id}" title="Eliminar">🗑️</button>
        </div>`
     : "";
 
   const imageRender = item.url_imagen
-    ? `
-      <div class="card-image-container" style="margin-top: 16px; border-radius: var(--radius-md); overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.08); background: rgba(0, 0, 0, 0.2);">
-        <img 
-          src="${item.url_imagen}" 
-          alt="${escapeHtml(item.titulo)}" 
-          class="card-attached-img" 
-          style="width: 100%; height: auto; display: block; cursor: pointer;"
-          onclick="openLightbox('${item.url_imagen}', '${escapeHtml(item.titulo)}')"
-        />
-      </div>
-    `
+    ? `<div class="card-image-container" style="margin-top: 16px; border-radius: 8px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(0, 0, 0, 0.2);">
+        <img src="${item.url_imagen}" class="card-attached-img" style="width: 100%; height: auto; display: block; cursor: pointer;" onclick="openLightbox('${item.url_imagen}', '${escapeHtml(item.titulo)}')" />
+      </div>`
     : "";
 
   let diapositivaViewer = "";
-
   if (item.url_diapositiva) {
     let rawUrl = item.url_diapositiva;
 
-    // Limpiamos forzado de descargas automáticas heredadas de Supabase
-    if (rawUrl.includes('storage.v1.object/public')) {
-      rawUrl = rawUrl.replace('?download=', '?view=');
+    // Limpiar URL de Supabase para evitar "downloads" automáticos
+    if (rawUrl.includes('?download=')) {
+      rawUrl = rawUrl.split('?download=')[0];
     }
 
     const urlString = rawUrl.toLowerCase();
-    let viewerRender = "";
+    let iframeSrc = "";
 
-    // Separación inteligente de formatos para evitar envíos al historial de descargas
-    if (urlString.includes('.pdf') || urlString.split('?')[0].endsWith('.pdf')) {
-      // Para PDFs: Renderizado nativo instantáneo sin descargas intermedias
-      viewerRender = `
-        <embed 
-          src="${rawUrl}" 
-          type="application/pdf"
-          width="100%" 
-          height="500px"
-          style="border: none; border-radius: 0 0 6px 6px; background: rgba(0, 0, 0, 0.15);"
-        />
-      `;
+    // LÓGICA: PDF directo / PPTX vía Google (con fondo blanco para visibilidad)
+    if (urlString.endsWith('.pdf')) {
+      iframeSrc = rawUrl;
     } else {
-      // Para PPTX: Visor Web Oficial de Microsoft Office (Cero descargas fantasmas)
-      const officeSrc = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(rawUrl)}`;
-      viewerRender = `
-        <iframe 
-          src="${officeSrc}" 
-          loading="lazy"
-          title="Vista previa de ${escapeHtml(item.titulo)}"
-          style="width: 100%; height: 500px; border: none; border-radius: 0 0 6px 6px; background: rgba(0, 0, 0, 0.15);"
-          allowfullscreen
-        >
-        </iframe>
-      `;
+      // Usamos el visor de Google pero SIN el Date.now() para no ensuciar el historial
+      iframeSrc = `https://docs.google.com/gview?url=${encodeURIComponent(rawUrl)}&embedded=true`;
     }
 
     diapositivaViewer = `
-      <div class="card-slide-viewer">
-        <div class="viewer-header">
-          <span>📊 Previsualización de Diapositivas</span>
-          <a 
-            href="${item.url_diapositiva}" 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            class="btn-fullscreen-slide"
-          >
-            🔍 Abrir completa
-          </a>
+      <div class="card-slide-viewer" style="margin-top: 20px; border-radius: 8px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1);">
+        <div class="viewer-header" style="background: rgba(255,255,255,0.05); padding: 10px 15px; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 0.85rem; color: #eee;">📊 Previsualización</span>
+          <a href="${item.url_diapositiva}" target="_blank" class="btn-fullscreen-slide" style="font-size: 0.8rem; color: var(--amber-accent, #64ffda); text-decoration: none;">🔍 Abrir completa</a>
         </div>
-        ${viewerRender}
+        <iframe 
+          src="${iframeSrc}" 
+          style="width: 100%; height: 500px; border: none; background: white; display: block;"
+          loading="lazy"
+          allowfullscreen
+        ></iframe>
       </div>
     `;
   }
 
   return `
-    <article class="card" data-seccion="${item.seccion}">
+    <article class="card">
       <div class="card-head">
         <div class="card-main-content" style="width: 100%;">
           <h3 class="card-title">${escapeHtml(item.titulo)}</h3>
-          <div class="card-desc" style="white-space: pre-wrap; color: #ccc; line-height: 1.5;">${parseMarkdownTables(escapeHtml(item.descripcion || ""))}</div>
+          <div class="card-desc" style="white-space: pre-wrap; color: #ccc; line-height: 1.5; margin-top: 10px;">
+            ${parseMarkdownTables(escapeHtml(item.descripcion || ""))}
+          </div>
           ${imageRender}
           ${diapositivaViewer}
         </div>
@@ -320,24 +244,19 @@ function cardTemplate(item) {
   `;
 }
 
-// ---------- Recursos de la semana (imágenes / diapositivas) ----------
-
 function renderResources() {
   const grid = $("#resource-grid");
   const conRecurso = state.contenidosSemana.filter((c) => c.url_imagen || c.url_diapositiva);
-
   if (conRecurso.length === 0) {
-    grid.innerHTML = `<div class="empty-state">Sin recursos descargables para esta semana.</div>`;
+    grid.innerHTML = `<div class="empty-state">Sin recursos descargables.</div>`;
     return;
   }
-
   grid.innerHTML = "";
   conRecurso.forEach((item) => {
     if (item.url_imagen) {
       const card = document.createElement("button");
       card.className = "resource-card";
-      card.innerHTML = `<img src="${item.url_imagen}" alt="${escapeHtml(item.titulo)}" />
-        <div class="resource-label">🖼️ ${escapeHtml(item.titulo)}</div>`;
+      card.innerHTML = `<img src="${item.url_imagen}" /> <div class="resource-label">🖼️ ${escapeHtml(item.titulo)}</div>`;
       card.addEventListener("click", () => openLightbox(item.url_imagen, item.titulo));
       grid.appendChild(card);
     }
@@ -346,7 +265,6 @@ function renderResources() {
       link.className = "resource-card";
       link.href = item.url_diapositiva;
       link.target = "_blank";
-      link.rel = "noopener noreferrer";
       link.innerHTML = `<div class="resource-label" style="padding-top:38px;">📎 ${escapeHtml(item.titulo)}</div>`;
       grid.appendChild(link);
     }
@@ -355,26 +273,10 @@ function renderResources() {
 
 function openLightbox(src, alt) {
   $("#lightbox-img").src = src;
-  $("#lightbox-img").alt = alt || "";
   $("#lightbox-backdrop").classList.remove("hidden");
 }
 
-// ---------- Funciones de administración (placeholder) ----------
-
-async function checkSession() {
-  // Implementar lógica de sesión
-  state.isAdmin = false; // Cambiar según autenticación
-}
-
-function openResourceModal(item) {
-  // Implementar modal de edición
-  console.log("Editar item:", item);
-}
-
-async function deleteContenido(id) {
-  if (!confirm("¿Estás seguro de eliminar este contenido?")) return;
-  // Implementar eliminación
-  console.log("Eliminar item:", id);
-}
+async function checkSession() { state.isAdmin = false; }
+async function deleteContenido(id) { console.log("Eliminar:", id); }
 
 document.addEventListener("DOMContentLoaded", init);
