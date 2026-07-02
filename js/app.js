@@ -222,7 +222,7 @@ function renderCards() {
 }
 
 // ==========================================================
-// CARDTEMPLATE CON VISUALIZADOR DE IMÁGENES Y DIAPOSITIVAS
+// CARDTEMPLATE CON VISUALIZADOR HÍBRIDO (PDF / PPTX) SEGURO
 // ==========================================================
 
 function cardTemplate(item) {
@@ -233,7 +233,6 @@ function cardTemplate(item) {
        </div>`
     : "";
 
-  // Renderizador de imagen adjunta dentro de la tarjeta
   const imageRender = item.url_imagen
     ? `
       <div class="card-image-container" style="margin-top: 16px; border-radius: var(--radius-md); overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.08); background: rgba(0, 0, 0, 0.2);">
@@ -248,15 +247,44 @@ function cardTemplate(item) {
     `
     : "";
 
-  // VISUALIZADOR SEGURO: Eliminamos gview por completo para evitar errores y descargas fantasma
   let diapositivaViewer = "";
 
   if (item.url_diapositiva) {
-    let iframeSrc = item.url_diapositiva;
+    let rawUrl = item.url_diapositiva;
 
-    // Si estás usando Supabase Storage, forzamos la visualización en lugar de la descarga
-    if (iframeSrc.includes('storage.v1.object/public')) {
-      iframeSrc = iframeSrc.replace('?download=', '?view=');
+    // Limpiamos forzado de descargas automáticas heredadas de Supabase
+    if (rawUrl.includes('storage.v1.object/public')) {
+      rawUrl = rawUrl.replace('?download=', '?view=');
+    }
+
+    const urlString = rawUrl.toLowerCase();
+    let viewerRender = "";
+
+    // Separación inteligente de formatos para evitar envíos al historial de descargas
+    if (urlString.includes('.pdf') || urlString.split('?')[0].endsWith('.pdf')) {
+      // Para PDFs: Renderizado nativo instantáneo sin descargas intermedias
+      viewerRender = `
+        <embed 
+          src="${rawUrl}" 
+          type="application/pdf"
+          width="100%" 
+          height="500px"
+          style="border: none; border-radius: 0 0 6px 6px; background: rgba(0, 0, 0, 0.15);"
+        />
+      `;
+    } else {
+      // Para PPTX: Visor Web Oficial de Microsoft Office (Cero descargas fantasmas)
+      const officeSrc = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(rawUrl)}`;
+      viewerRender = `
+        <iframe 
+          src="${officeSrc}" 
+          loading="lazy"
+          title="Vista previa de ${escapeHtml(item.titulo)}"
+          style="width: 100%; height: 500px; border: none; border-radius: 0 0 6px 6px; background: rgba(0, 0, 0, 0.15);"
+          allowfullscreen
+        >
+        </iframe>
+      `;
     }
 
     diapositivaViewer = `
@@ -272,13 +300,7 @@ function cardTemplate(item) {
             🔍 Abrir completa
           </a>
         </div>
-        <embed 
-          src="${iframeSrc}" 
-          type="application/pdf"
-          width="100%" 
-          height="500px"
-          style="border: none; border-radius: 0 0 6px 6px; background: rgba(0, 0, 0, 0.1);"
-        />
+        ${viewerRender}
       </div>
     `;
   }
