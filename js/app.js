@@ -86,7 +86,7 @@ function renderMateriaSwitch() {
     btn.addEventListener("click", () => {
       state.materiaActual = m;
       
-      // Cambiar dinámicamente el fondo de pantalla según la materia seleccionada
+      // NUEVO: Cambiar dinámicamente el fondo de pantalla según la materia seleccionada
       document.body.setAttribute("data-materia", m.slug);
       
       renderMateriaSwitch();
@@ -185,7 +185,7 @@ function renderCards() {
 }
 
 // ==========================================================
-// CARDTEMPLATE CON VISTA CRISTALINA PARA RECURSOS Y DOCUMENTOS
+// CARDTEMPLATE CON VISUALIZADOR DE IMÁGENES Y DIAPOSITIVAS
 // ==========================================================
 
 function cardTemplate(item) {
@@ -196,7 +196,7 @@ function cardTemplate(item) {
        </div>`
     : "";
 
-  // Renderizador de imagen adjunta dentro de la tarjeta
+  // NUEVO: Renderizador de imagen adjunta dentro de la tarjeta
   const imageRender = item.url_imagen
     ? `
       <div class="card-image-container" style="margin-top: 16px; border-radius: var(--radius-md); overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.08); background: rgba(0, 0, 0, 0.2);">
@@ -211,53 +211,31 @@ function cardTemplate(item) {
     `
     : "";
 
-  // VISUALIZADOR INTELIGENTE DE ALTA RESOLUCIÓN
-  let diapositivaViewer = "";
-  
-  if (item.url_diapositiva) {
-    const urlLower = item.url_diapositiva.toLowerCase();
-    
-    // Si es un PDF, render nativo de súper alta definición sin compresión externa
-    if (urlLower.includes(".pdf")) {
-      diapositivaViewer = `
-        <div class="card-slide-viewer">
-          <div class="viewer-header">
-            <span>📄 Documento PDF (Fidelidad Original)</span>
-            <a href="${item.url_diapositiva}" target="_blank" rel="noopener noreferrer" class="btn-fullscreen-slide">
-              🔍 Abrir completo
-            </a>
-          </div>
-          <iframe 
-            src="${item.url_diapositiva}" 
-            loading="lazy"
-            title="Vista previa de ${escapeHtml(item.titulo)}"
-            allowfullscreen
+  // VISUALIZADOR DE DIAPOSITIVAS
+  const diapositivaViewer = item.url_diapositiva
+    ? `
+      <div class="card-slide-viewer">
+        <div class="viewer-header">
+          <span>📊 Previsualización de Diapositivas</span>
+          <a 
+            href="${item.url_diapositiva}" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            class="btn-fullscreen-slide"
           >
-          </iframe>
+            🔍 Abrir completa
+          </a>
         </div>
-      `;
-    } else {
-      // Si es un PowerPoint (.pptx), forzamos los parámetros de escalado para evitar letras borrosas
-      diapositivaViewer = `
-        <div class="card-slide-viewer">
-          <div class="viewer-header">
-            <span>📊 Presentación en Alta Definición</span>
-            <a href="${item.url_diapositiva}" target="_blank" rel="noopener noreferrer" class="btn-fullscreen-slide">
-              🔍 Abrir completa
-            </a>
-          </div>
-          <iframe 
-            src="https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(item.url_diapositiva)}&wdAr=1.7777777777777777" 
-            loading="lazy"
-            title="Vista previa de ${escapeHtml(item.titulo)}"
-            allowfullscreen
-            style="image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;"
-          >
-          </iframe>
-        </div>
-      `;
-    }
-  }
+        <iframe 
+          src="https://docs.google.com/gview?url=${encodeURIComponent(item.url_diapositiva)}&embedded=true" 
+          loading="lazy"
+          title="Vista previa de ${escapeHtml(item.titulo)}"
+          allowfullscreen
+        >
+        </iframe>
+      </div>
+    `
+    : "";
 
   return `
     <article class="card" data-seccion="${item.seccion}">
