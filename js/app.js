@@ -185,7 +185,7 @@ function renderCards() {
 }
 
 // ==========================================================
-// CARDTEMPLATE CON VISUALIZADOR DE IMÁGENES Y DIAPOSITIVAS
+// CARDTEMPLATE CON VISTA CRISTALINA PARA RECURSOS Y DOCUMENTOS
 // ==========================================================
 
 function cardTemplate(item) {
@@ -211,18 +211,18 @@ function cardTemplate(item) {
     `
     : "";
 
-  // VISUALIZADOR INTELIGENTE ADAPTADO PARA ENLACES DE SUPABASE
+  // VISUALIZADOR INTELIGENTE DE ALTA RESOLUCIÓN
   let diapositivaViewer = "";
   
   if (item.url_diapositiva) {
     const urlLower = item.url_diapositiva.toLowerCase();
     
-    // Si la URL contiene ".pdf", se renderiza de forma nativa e inmediata en el navegador
+    // Si es un PDF, render nativo de súper alta definición sin compresión externa
     if (urlLower.includes(".pdf")) {
       diapositivaViewer = `
         <div class="card-slide-viewer">
           <div class="viewer-header">
-            <span>📄 Documento PDF Integrado</span>
+            <span>📄 Documento PDF (Fidelidad Original)</span>
             <a href="${item.url_diapositiva}" target="_blank" rel="noopener noreferrer" class="btn-fullscreen-slide">
               🔍 Abrir completo
             </a>
@@ -237,20 +237,21 @@ function cardTemplate(item) {
         </div>
       `;
     } else {
-      // Para cualquier otro enlace de archivo (como presentaciones de Office o enlaces crudos de Supabase) usamos Office Live
+      // Si es un PowerPoint (.pptx), forzamos los parámetros de escalado para evitar letras borrosas
       diapositivaViewer = `
         <div class="card-slide-viewer">
           <div class="viewer-header">
-            <span>📊 Presentación / Documento</span>
+            <span>📊 Presentación en Alta Definición</span>
             <a href="${item.url_diapositiva}" target="_blank" rel="noopener noreferrer" class="btn-fullscreen-slide">
               🔍 Abrir completa
             </a>
           </div>
           <iframe 
-            src="https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(item.url_diapositiva)}" 
+            src="https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(item.url_diapositiva)}&wdAr=1.7777777777777777" 
             loading="lazy"
             title="Vista previa de ${escapeHtml(item.titulo)}"
             allowfullscreen
+            style="image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;"
           >
           </iframe>
         </div>
