@@ -21,6 +21,48 @@ function escapeHtml(str) {
   }[c]));
 }
 
+// NUEVO: Procesador específico para dibujar las tablas en el campo de descripción
+function parseMarkdownTable(text) {
+  if (!text) return "";
+
+  // Primero escapamos el HTML normal por seguridad ante inyecciones
+  let safeText = escapeHtml(text);
+
+  // Expresión regular para detectar bloques que simulan tablas Markdown (| col | col |)
+  const tableRegex = /((?:\|[^\n]*\|(?:\r?\n?))+)/g;
+
+  return safeText.replace(tableRegex, (match) => {
+    const lines = match.trim().split(/\r?\n/);
+    if (lines.length < 2) return match; // No cuenta como estructura válida
+
+    let tableHtml = '<div style="overflow-x: auto; margin: 16px 0;"><table style="width:100%; border-collapse: collapse; border: 1px solid rgba(255,255,255,0.15); font-size: 14px;">';
+
+    lines.forEach((line, index) => {
+      // Limpiamos los bordes y dividimos las celdas por la barra vertical
+      const cells = line.split('|').map(c => c.trim()).filter((c, i, arr) => i > 0 && i < arr.length - 1);
+      
+      // Saltarse la fila decorativa de guiones divisorios (ej: --- | ---)
+      if (line.includes('---')) return;
+
+      tableHtml += '<tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">';
+      cells.forEach(cell => {
+        // Primera línea actúa como cabecera (th)
+        if (index === 0) {
+          tableHtml += `<th style="padding: 10px; background: rgba(255,255,255,0.05); text-align: left; font-weight: 600; color: #fff;">${cell}</th>`;
+        } else {
+          // Soporte básico para negritas internas utilizando la sintaxis **texto**
+          const cleanCell = cell.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+          tableHtml += `<td style="padding: 10px; color: rgba(255,255,255,0.8);">${cleanCell}</td>`;
+        }
+      });
+      tableHtml += '</tr>';
+    });
+
+    tableHtml += '</table></div>';
+    return tableHtml;
+  });
+}
+
 function showToast(msg, isError = false) {
   const existing = document.querySelector(".toast");
   if (existing) existing.remove();
@@ -237,12 +279,13 @@ function cardTemplate(item) {
     `
     : "";
 
+  // MODIFICADO: Ahora usa parseMarkdownTable() y se cambió el contenedor p por un div para que valide correctamente la estructura HTML
   return `
     <article class="card" data-seccion="${item.seccion}">
       <div class="card-head">
         <div class="card-main-content" style="width: 100%;">
           <h3 class="card-title">${escapeHtml(item.titulo)}</h3>
-          <p class="card-desc" style="white-space: pre-wrap;">${escapeHtml(item.descripcion || "")}</p>
+          <div class="card-desc" style="white-space: pre-wrap; line-height: 1.6;">${parseMarkdownTable(item.descripcion || "")}</div>
           ${imageRender}
           ${diapositivaViewer}
         </div>
